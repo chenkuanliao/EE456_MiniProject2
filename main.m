@@ -66,15 +66,25 @@ testImages = reshape(testImages, [32, 32, 3, size(testImages, 2)]);
 
 % Define the CNN architecture
 layers = [
+    % input layer
     imageInputLayer([32, 32, 3])
 
+    % layer 1
     convolution2dLayer(3, 64, 'Padding', 'same')
     batchNormalizationLayer
     reluLayer
 
     maxPooling2dLayer(2, 'Stride', 2)
 
+    % layer 2
     convolution2dLayer(3, 128, 'Padding', 'same')
+    batchNormalizationLayer
+    reluLayer
+
+    maxPooling2dLayer(2, 'Stride', 2)
+
+    % layer 3
+    convolution2dLayer(3, 256, 'Padding', 'same')
     batchNormalizationLayer
     reluLayer
 
@@ -90,6 +100,7 @@ options = trainingOptions('sgdm', ...
     'MaxEpochs', 10, ...
     'MiniBatchSize', 128, ...
     'ValidationData', {validationImages, validationLabels}, ...
+    'ValidationFrequency', 5, ...
     'Plots', 'training-progress', ...
     'Verbose', true);
 
@@ -100,3 +111,6 @@ net = trainNetwork(trainImages, trainLabels, layers, options);
 predictedLabels = classify(net, testImages);
 accuracy = sum(predictedLabels == testLabels) / numel(testLabels);
 fprintf('Accuracy on the test set: %.2f%%\n', accuracy * 100);
+
+% Save the trained network to a file
+save('trained_network.mat', 'net');
