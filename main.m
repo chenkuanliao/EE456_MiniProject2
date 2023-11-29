@@ -46,36 +46,57 @@ trainingLabel = AllLabel(1:38400, :);
 validationLabel = AllLabel(38401:48000, :);
 testingLabel = AllLabel(48001:60000, :);
 
-validationTable = table(validationData, categorical(validationLabel), 'VariableNames', {'Features', 'Label'});
-trainingData = reshape(trainingData', [32, 32, 3, numel(trainingLabel)]);
+
 
 %----------------------------------------------
 % training the CNN
-inputSize = [32 32 3];
-numClasses = 10;
+trainImages = trainingData';
+trainLabels = categorical(trainingLabel);
 
+validationImages = validationData';
+validationLabels = categorical(validationLabel);
+
+testImages = testingData';
+testLabels = categorical(testingLabel);
+
+% Reshape the data to 32x32x3 (height x width x channels)
+trainImages = reshape(trainImages, [32, 32, 3, size(trainImages, 2)]);
+validationImages = reshape(validationImages, [32, 32, 3, size(validationImages, 2)]);
+testImages = reshape(testImages, [32, 32, 3, size(testImages, 2)]);
+
+% Define the CNN architecture
 layers = [
-    imageInputLayer(inputSize)
-    convolution2dLayer(5,20)
+    imageInputLayer([32, 32, 3])
+
+    convolution2dLayer(3, 64, 'Padding', 'same')
     batchNormalizationLayer
     reluLayer
-    fullyConnectedLayer(numClasses)
+
+    maxPooling2dLayer(2, 'Stride', 2)
+
+    convolution2dLayer(3, 128, 'Padding', 'same')
+    batchNormalizationLayer
+    reluLayer
+
+    maxPooling2dLayer(2, 'Stride', 2)
+
+    fullyConnectedLayer(10)
     softmaxLayer
-    classificationLayer];
+    classificationLayer
+];
 
+% Specify training options
 options = trainingOptions('sgdm', ...
-    'MaxEpochs',4, ...
-    'ValidationData',validationTable , ...
-    'ValidationFrequency',30, ...
-    'Verbose',false, ...
-    'Plots','training-progress');
-disp(size(trainingData));
-disp(size(trainingLabel));
+    'MaxEpochs', 10, ...
+    'MiniBatchSize', 128, ...
+    'ValidationData', {validationImages, validationLabels}, ...
+    'Plots', 'training-progress', ...
+    'Verbose', true);
 
-net = trainNetwork(trainingData, categorical(trainingLabel), layers, options);
+% Train the CNN
+net = trainNetwork(trainImages, trainLabels, layers, options);
 
-%----------------------------------------------
-% testing the CNN
-YPred = classify(net, testingData);
-YValidation = categorical(testingLabel);  % Convert testing labels to categorical
-accuracy = mean(YPred == YValidation);
+% Evaluate on the test set
+predictedLabels = classify(net, testImages);
+accuracy = sum(predictedLabels == testLabels) / numel(testLabels);
+fprintf('Accuracy on the test set: %.2f%%\n', accuracy * 100);
