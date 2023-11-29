@@ -72,6 +72,7 @@ layers = [
     convolution2dLayer(3, 64, 'Padding', 'same')
     batchNormalizationLayer
     reluLayer
+    dropoutLayer(0.2) % Add dropout layer
 
     maxPooling2dLayer(2, 'Stride', 2)
 
@@ -79,6 +80,7 @@ layers = [
     convolution2dLayer(3, 128, 'Padding', 'same')
     batchNormalizationLayer
     reluLayer
+    dropoutLayer(0.2) % Add dropout layer
 
     maxPooling2dLayer(2, 'Stride', 2)
 
@@ -86,6 +88,7 @@ layers = [
     convolution2dLayer(3, 256, 'Padding', 'same')
     batchNormalizationLayer
     reluLayer
+    dropoutLayer(0.2) % Add dropout layer
 
     maxPooling2dLayer(2, 'Stride', 2)
 
@@ -97,19 +100,20 @@ layers = [
 % Specify training options
 options = trainingOptions('sgdm', ...
     'MaxEpochs', 10, ...
-    'MiniBatchSize', 128, ...
+    'MiniBatchSize', 256, ...
     'ValidationData', {validationImages, validationLabels}, ...
     'ValidationFrequency', 5, ...
     'Plots', 'training-progress', ...
-    'Verbose', true);
+    'Verbose', true, ...
+    'L2Regularization', 0.01); % Add weight regularization
 
 % Train the CNN
-net = trainNetwork(trainImages, trainLabels, layers, options);
+net2 = trainNetwork(trainImages, trainLabels, layers, options);
 
 % Evaluate on the test set
-predictedLabels = classify(net, testImages);
+predictedLabels = classify(net2, testImages);
 accuracy = sum(predictedLabels == testLabels) / numel(testLabels);
 fprintf('Accuracy on the test set: %.2f%%\n', accuracy * 100);
 
 % Save the trained network to a file
-save('trained_network.mat', 'net');
+save('trained_network2.mat', 'net2');
