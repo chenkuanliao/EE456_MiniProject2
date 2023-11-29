@@ -46,14 +46,36 @@ trainingLabel = AllLabel(1:38400, :);
 validationLabel = AllLabel(38401:48000, :);
 testingLabel = AllLabel(48001:60000, :);
 
+validationTable = table(validationData, categorical(validationLabel), 'VariableNames', {'Features', 'Label'});
+trainingData = reshape(trainingData', [32, 32, 3, numel(trainingLabel)]);
+
 %----------------------------------------------
 % training the CNN
+inputSize = [32 32 3];
+numClasses = 10;
 
+layers = [
+    imageInputLayer(inputSize)
+    convolution2dLayer(5,20)
+    batchNormalizationLayer
+    reluLayer
+    fullyConnectedLayer(numClasses)
+    softmaxLayer
+    classificationLayer];
+
+options = trainingOptions('sgdm', ...
+    'MaxEpochs',4, ...
+    'ValidationData',validationTable , ...
+    'ValidationFrequency',30, ...
+    'Verbose',false, ...
+    'Plots','training-progress');
+disp(size(trainingData));
+disp(size(trainingLabel));
+
+net = trainNetwork(trainingData, categorical(trainingLabel), layers, options);
 
 %----------------------------------------------
 % testing the CNN
-
-
-%----------------------------------------------
-% plott the graphs
-
+YPred = classify(net, testingData);
+YValidation = categorical(testingLabel);  % Convert testing labels to categorical
+accuracy = mean(YPred == YValidation);
