@@ -100,3 +100,4 @@ net = trainNetwork(trainImages, trainLabels, layers, options);
 predictedLabels = classify(net, testImages);
 accuracy = sum(predictedLabels == testLabels) / numel(testLabels);
 fprintf('Accuracy on the test set: %.2f%%\n', accuracy * 100);
+
