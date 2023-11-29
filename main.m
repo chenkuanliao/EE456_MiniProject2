@@ -6,7 +6,6 @@ close all;
 % handle the data
 load data\batches.meta.mat
 labelNames = label_names;
-disp(labelNames); % 10x1
 
 AllData = zeros(60000, 3072);
 AllLabel = zeros(60000, 1);
