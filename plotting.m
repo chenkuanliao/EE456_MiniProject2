@@ -108,5 +108,31 @@ for i = 1:10
     end
 end
 
-fprintf("acurracy: %.2f\n", (12000-miss)/12000);
+fprintf("accuracy: %.2f\n", (12000-miss)/12000);
+
+% pick 10 images and check the prediction and probability 
+correct = 0;
+incorrect = 0;
+for i = 1:10
+    randomInteger = randi([1, 12000]);
+
+    fprintf("Picked the %d th image\n", randomInteger);
+    % Make predictions on new data
+    image = testImages(:, :, :, randomInteger);
+    label = testingLabel(i, 1);
+    prediction = grp2idx(classify(net2, image));
+    disp("-------------------------------------------");
+    if label+1 == prediction
+        disp("Correctly predicted");
+        correct = correct + 1;
+    else
+        disp("Incorrectly predicted");
+        incorrect = incorrect + 1;
+    end
+    fprintf("The image is a %s\n", labelNames{label+1});
+    fprintf("It is predicted as a %s\n", labelNames{prediction});
+end
+
+fprintf("The accuracy is %.1f\n", correct/(incorrect+correct));
+
 
