@@ -108,12 +108,12 @@ options = trainingOptions('sgdm', ...
     'L2Regularization', 0.01); % Add weight regularization
 
 % Train the CNN
-net2 = trainNetwork(trainImages, trainLabels, layers, options);
+net = trainNetwork(trainImages, trainLabels, layers, options);
 
 % Evaluate on the test set
-predictedLabels = classify(net2, testImages);
+predictedLabels = classify(net, testImages);
 accuracy = sum(predictedLabels == testLabels) / numel(testLabels);
 fprintf('Accuracy on the test set: %.2f%%\n', accuracy * 100);
 
 % Save the trained network to a file
-save('trained_network2.mat', 'net2');
+save('trained_cnn.mat', 'net');
